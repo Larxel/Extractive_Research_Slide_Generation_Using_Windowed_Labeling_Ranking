@@ -52,7 +52,7 @@ class SummaRuNNer(object):
             self.doc_sent_embed = tf.reshape(self.sent_bigru_avg,
                                              (params.batch_size, self.doc_len, 2 * self.hidden_size))
 
-        with tf.variable_scope("doc_level_BiGRU"):
+        with tf.compat.v1.variable_scope("doc_level_BiGRU"):
             fw_cell_2 = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
             bw_cell_2 = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
             doc_GRU_out, _ = tf.compat.v1.nn.bidirectional_dynamic_rnn(fw_cell_2, bw_cell_2, self.doc_sent_embed,
@@ -78,7 +78,7 @@ class SummaRuNNer(object):
             bias = tf.Variable(tf.random.normal([1]), name="biases")
 
         scores = []
-        with tf.variable_scope("score_layer"):
+        with tf.compat.v1.variable_scope("score_layer"):
             for position, sent_hidden in enumerate(tf.unstack(self.doc_bigru, axis=(1))):
                 # shape=(64, 400) # The first sentences of all docs
                 sy = tf.compat.v1.nn.relu(tf.matmul(sent_hidden, Wf) + bf)  # shape= (64,100)
