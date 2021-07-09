@@ -37,7 +37,7 @@ def train():
             writer = tf.compat.v1.summary.FileWriter(log_dir, sess.graph)
             train_loss_summary = tf.compat.v1.summary.scalar('train_loss', Summa.loss)
             streaming_loss, streaming_loss_update = tf.contrib.metrics.streaming_mean(Summa.loss)
-            streaming_loss_scalar = tf.summary.scalar('validation_loss', streaming_loss)
+            streaming_loss_scalar = tf.compat.v1.summary.scalar('validation_loss', streaming_loss)
 
             global_step = tf.Variable(0, name="global_step", trainable=False)
             train_params = tf.compat.v1.trainable_variables()
@@ -54,7 +54,7 @@ def train():
             checkpoint_prefix = os.path.join(checkpoint_dir, "model")
 
             sess.run(tf.compat.v1.global_variables_initializer())
-            sess.run(tf.local_variables_initializer())
+            sess.run(tf.compat.v1.local_variables_initializer())
             min_eval_loss = float('Inf')
             min_train_loss = float('Inf')
             val_step = 0

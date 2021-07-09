@@ -25,12 +25,12 @@ class SummaRuNNer(object):
         with tf.compat.v1.variable_scope('inputs'):
             self.x = tf.compat.v1.placeholder(tf.int32, shape=[batch_size, self.doc_len, self.sent_len], name="x_input")
             self.y = tf.compat.v1.placeholder(tf.float32, shape=[batch_size, self.doc_len])
-            self.sequence_length = tf.reduce_sum(tf.sign(self.x), axis=1)
-            self.doc_length = tf.reduce_sum(tf.sign(self.sequence_length), axis=0)
+            self.sequence_length = tf.reduce_sum(input_tensor=tf.sign(self.x), axis=1)
+            self.doc_length = tf.reduce_sum(input_tensor=tf.sign(self.sequence_length), axis=0)
 
         with tf.compat.v1.variable_scope('embedding_layer'):
             self.embeddings = tf.compat.v1.get_variable(name='embeddings',
-                                                        initializer=tf.convert_to_tensor(self.pretrained_embedding),
+                                                        initializer=tf.convert_to_tensor(value=self.pretrained_embedding),
                                                         dtype=tf.float32)
 
             document_placeholder_flat = tf.reshape(self.x, [-1])
@@ -48,7 +48,7 @@ class SummaRuNNer(object):
                                                                    scope='bi-GRU',
                                                                    dtype=tf.float32)
             self.sent_bigru = tf.concat([self.sent_GRU_out[0], self.sent_GRU_out[1]], 2)  # shape=(6400, 50, 400)
-            self.sent_bigru_avg = tf.reduce_mean(self.sent_bigru, axis=1)  # shape=(6400, 400)
+            self.sent_bigru_avg = tf.reduce_mean(input_tensor=self.sent_bigru, axis=1)  # shape=(6400, 400)
             self.doc_sent_embed = tf.reshape(self.sent_bigru_avg,
                                              (params.batch_size, self.doc_len, 2 * self.hidden_size))
 
@@ -58,7 +58,7 @@ class SummaRuNNer(object):
             doc_GRU_out, _ = tf.compat.v1.nn.bidirectional_dynamic_rnn(fw_cell_2, bw_cell_2, self.doc_sent_embed,
                                                              dtype=tf.float32)
             self.doc_bigru = tf.concat([doc_GRU_out[0], doc_GRU_out[1]], 2)  # shape=(64, 100, 400)
-            self.docs = tf.reduce_mean(self.doc_bigru, axis=1)  # shape=(64, 400)
+            self.docs = tf.reduce_mean(input_tensor=self.doc_bigru, axis=1)  # shape=(64, 400)
 
             # document embedding
             Wf0 = tf.Variable(tf.random.uniform([2 * self.hidden_size, 100], -1.0, 1.0), name='W0')
@@ -82,25 +82,25 @@ class SummaRuNNer(object):
             for position, sent_hidden in enumerate(tf.unstack(self.doc_bigru, axis=(1))):
                 # shape=(64, 400) # The first sentences of all docs
                 sy = tf.compat.v1.nn.relu(tf.matmul(sent_hidden, Wf) + bf)  # shape= (64,100)
-                h = tf.transpose(sy, perm=(1, 0))  # shape=(100,64)
+                h = tf.transpose(a=sy, perm=(1, 0))  # shape=(100,64)
                 pos_embed = tf.compat.v1.nn.embedding_lookup(Wpe, position)  # shape=(50,)
                 p = tf.reshape(pos_embed, (1, -1))  # shape=(50,1)
                 positions = tf.tile(p, tf.constant([params.batch_size, 1]))  # shape=(64, 50)
                 content = tf.squeeze(tf.matmul(Wc, h))  # shape(64,)
-                salience = tf.reduce_sum(tf.multiply(tf.matmul(sy, Ws), self.docs_embeds), axis=1)  # shape=(64,)
-                novelty = -1 * tf.reduce_sum(tf.multiply(tf.matmul(sy, Wr), tf.tanh(self.docs_embeds)),
+                salience = tf.reduce_sum(input_tensor=tf.multiply(tf.matmul(sy, Ws), self.docs_embeds), axis=1)  # shape=(64,)
+                novelty = -1 * tf.reduce_sum(input_tensor=tf.multiply(tf.matmul(sy, Wr), tf.tanh(self.docs_embeds)),
                                              axis=1)  # shape=(64,)
-                position_embeds = tf.reduce_sum(tf.multiply(Wp, positions), axis=1)  # shape=(64,)
+                position_embeds = tf.reduce_sum(input_tensor=tf.multiply(Wp, positions), axis=1)  # shape=(64,)
                 Prob = tf.sigmoid(content + salience + novelty + position_embeds + bias)  # shape=(64,)
                 multiplier = tf.tile(tf.reshape(Prob, [-1, 1]), tf.constant([1, 100], tf.int32))  # shape=(64,100)
                 s = s + tf.multiply(multiplier, sy)
                 scores.append(Prob)
-            self.y_ = tf.transpose(tf.convert_to_tensor(scores, name="prediction"), perm=(1, 0))  # shape=(64,100)
+            self.y_ = tf.transpose(a=tf.convert_to_tensor(value=scores, name="prediction"), perm=(1, 0))  # shape=(64,100)
         # Calculate Mean cross-entropy loss
-        with tf.name_scope("loss"):
+        with tf.compat.v1.name_scope("loss"):
             epsilon_one = 1e-37
             epsilon_zero = 1e-1
             target = self.y
             output = self.y_
             self.loss = tf.reduce_sum(
-                -(target * tf.math.log(output + epsilon_one) + (1. - target) * tf.math.log(1. - output + epsilon_zero)))
+                input_tensor=-(target * tf.math.log(output + epsilon_one) + (1. - target) * tf.math.log(1. - output + epsilon_zero)))
