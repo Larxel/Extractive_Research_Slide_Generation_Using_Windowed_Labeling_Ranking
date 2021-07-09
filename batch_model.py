@@ -34,7 +34,7 @@ class SummaRuNNer(object):
                                                         dtype=tf.float32)
 
             document_placeholder_flat = tf.reshape(self.x, [-1])
-            document_word_embedding = tf.nn.embedding_lookup(self.embeddings, document_placeholder_flat, name="Lookup")
+            document_word_embedding = tf.compat.v1.nn.embedding_lookup(self.embeddings, document_placeholder_flat, name="Lookup")
             # documents_word_embedding = tf.reshape(document_word_embedding, [-1, self.doc_len,
             #                                                              self.sent_len, self.embedding_size])
             all_sents_word_embedding = tf.reshape(document_word_embedding, [-1, self.sent_len, self.embedding_size])
@@ -44,7 +44,7 @@ class SummaRuNNer(object):
         with tf.compat.v1.variable_scope("sent_level_BiGRU"):
             fw_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
             bw_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
-            self.sent_GRU_out, _ = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, all_sents_word_embedding,
+            self.sent_GRU_out, _ = tf.compat.v1.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, all_sents_word_embedding,
                                                                    scope='bi-GRU',
                                                                    dtype=tf.float32)
             self.sent_bigru = tf.concat([self.sent_GRU_out[0], self.sent_GRU_out[1]], 2)  # shape=(6400, 50, 400)
@@ -53,9 +53,9 @@ class SummaRuNNer(object):
                                              (params.batch_size, self.doc_len, 2 * self.hidden_size))
 
         with tf.variable_scope("doc_level_BiGRU"):
-            fw_cell_2 = tf.nn.rnn_cell.GRUCell(self.hidden_size)
-            bw_cell_2 = tf.nn.rnn_cell.GRUCell(self.hidden_size)
-            doc_GRU_out, _ = tf.nn.bidirectional_dynamic_rnn(fw_cell_2, bw_cell_2, self.doc_sent_embed,
+            fw_cell_2 = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
+            bw_cell_2 = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
+            doc_GRU_out, _ = tf.compat.v1.nn.bidirectional_dynamic_rnn(fw_cell_2, bw_cell_2, self.doc_sent_embed,
                                                              dtype=tf.float32)
             self.doc_bigru = tf.concat([doc_GRU_out[0], doc_GRU_out[1]], 2)  # shape=(64, 100, 400)
             self.docs = tf.reduce_mean(self.doc_bigru, axis=1)  # shape=(64, 400)
@@ -63,7 +63,7 @@ class SummaRuNNer(object):
             # document embedding
             Wf0 = tf.Variable(tf.random.uniform([2 * self.hidden_size, 100], -1.0, 1.0), name='W0')
             bf0 = tf.Variable(tf.zeros(shape=[100]), name='b0')
-            self.docs_embeds = tf.nn.relu(tf.matmul(self.docs, Wf0) + bf0)  # shape=(64, 100)
+            self.docs_embeds = tf.compat.v1.nn.relu(tf.matmul(self.docs, Wf0) + bf0)  # shape=(64, 100)
 
             # position embedding
             Wpe = tf.Variable(tf.random.normal([500, self.sent_len]))
@@ -81,9 +81,9 @@ class SummaRuNNer(object):
         with tf.variable_scope("score_layer"):
             for position, sent_hidden in enumerate(tf.unstack(self.doc_bigru, axis=(1))):
                 # shape=(64, 400) # The first sentences of all docs
-                sy = tf.nn.relu(tf.matmul(sent_hidden, Wf) + bf)  # shape= (64,100)
+                sy = tf.compat.v1.nn.relu(tf.matmul(sent_hidden, Wf) + bf)  # shape= (64,100)
                 h = tf.transpose(sy, perm=(1, 0))  # shape=(100,64)
-                pos_embed = tf.nn.embedding_lookup(Wpe, position)  # shape=(50,)
+                pos_embed = tf.compat.v1.nn.embedding_lookup(Wpe, position)  # shape=(50,)
                 p = tf.reshape(pos_embed, (1, -1))  # shape=(50,1)
                 positions = tf.tile(p, tf.constant([params.batch_size, 1]))  # shape=(64, 50)
                 content = tf.squeeze(tf.matmul(Wc, h))  # shape(64,)
