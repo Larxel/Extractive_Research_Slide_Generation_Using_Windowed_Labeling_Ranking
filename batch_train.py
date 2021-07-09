@@ -7,14 +7,14 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 np.set_printoptions(threshold=sys.maxsize)
 # Parameters
 # ==================================================
-tf.flags.DEFINE_integer("num_epochs", 300, "Number of training epochs (default: 200)")
-tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
-tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
+tf.compat.flags.DEFINE_integer("num_epochs", 300, "Number of training epochs (default: 200)")
+tf.compat.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
+tf.compat.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 # Misc Parameters
-tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
-tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
+tf.compat.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
+tf.compat.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-FLAGS = tf.flags.FLAGS
+FLAGS = tf.compat.flags.FLAGS
 vocab = Vocab(params.max_vocab_size, emb_dim=50, dataset_path='data/',
               glove_path='glove/glove.6B.50d.txt',
               vocab_path='data_files/vocab.txt', lookup_path='data_files/lookup.pkl')
