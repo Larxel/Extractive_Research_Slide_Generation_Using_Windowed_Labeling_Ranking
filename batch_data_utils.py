@@ -14,7 +14,7 @@ import params
 # Setting-up seeds
 random.seed(2019)
 np.random.seed(2019)
-tf.set_random_seed(2019)
+tf.compat.v1.set_random_seed(2019)
 
 
 def read_text_file(text_file):
