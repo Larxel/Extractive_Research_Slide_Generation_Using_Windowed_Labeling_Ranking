@@ -36,7 +36,7 @@ def train():
             Summa = SummaRuNNer(vocab.size(), vocab._dim, vocab.wvecs)
             writer = tf.compat.v1.summary.FileWriter(log_dir, sess.graph)
             train_loss_summary = tf.compat.v1.summary.scalar('train_loss', Summa.loss)
-            streaming_loss, streaming_loss_update = tf.metrics.mean(Summa.loss)
+            streaming_loss, streaming_loss_update = tf.compat.v1.metrics.mean(Summa.loss)
             streaming_loss_scalar = tf.compat.v1.summary.scalar('validation_loss', streaming_loss)
 
             global_step = tf.Variable(0, name="global_step", trainable=False)
