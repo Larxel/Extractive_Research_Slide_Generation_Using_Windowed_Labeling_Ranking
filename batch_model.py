@@ -103,4 +103,4 @@ class SummaRuNNer(object):
             target = self.y
             output = self.y_
             self.loss = tf.reduce_sum(
-                -(target * tf.log(output + epsilon_one) + (1. - target) * tf.log(1. - output + epsilon_zero)))
+                -(target * tf.math.log(output + epsilon_one) + (1. - target) * tf.math.log(1. - output + epsilon_zero)))
