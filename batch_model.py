@@ -42,8 +42,8 @@ class SummaRuNNer(object):
             # now it is 3 dimensional and suitable for applying GRU
             # shape=(6400, 50, 50)
         with tf.compat.v1.variable_scope("sent_level_BiGRU"):
-            fw_cell = tf.nn.rnn_cell.GRUCell(self.hidden_size)
-            bw_cell = tf.nn.rnn_cell.GRUCell(self.hidden_size)
+            fw_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
+            bw_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size)
             self.sent_GRU_out, _ = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, all_sents_word_embedding,
                                                                    scope='bi-GRU',
                                                                    dtype=tf.float32)
