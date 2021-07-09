@@ -7,7 +7,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 np.set_printoptions(threshold=sys.maxsize)
 # Parameters
 # ==================================================
-tf.compat.v1.flags.DEFINE_integer("num_epochs", 300, "Number of training epochs (default: 200)")
+tf.compat.v1.flags.DEFINE_integer("num_epochs", 30, "Number of training epochs (default: 200)")
 tf.compat.v1.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.compat.v1.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 # Misc Parameters
