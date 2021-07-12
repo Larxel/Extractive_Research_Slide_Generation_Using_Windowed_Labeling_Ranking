@@ -50,7 +50,7 @@ def train():
             train_op = tf.compat.v1.train.AdadeltaOptimizer(learning_rate=0.1).minimize(Summa.loss,
                                                                                         var_list=train_params)
             # train_op = tf.compat.v1.train.AdamOptimizer(learning_rate=1).minimize(Summa.loss, var_list=train_params)
-            saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables(), max_to_keep=FLAGS.num_checkpoints)
+            #saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables(), max_to_keep=FLAGS.num_checkpoints)
 
             # create log dirs
             out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", current_time))
