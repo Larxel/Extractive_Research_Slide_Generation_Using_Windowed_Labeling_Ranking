@@ -1,11 +1,16 @@
-import logging
 import sys
-
-import numpy
-from batch_data_utils import *
 import time
+import numpy
 import random
+import logging
 import tensorflow as tf
+from batch_data_utils import *
+
+
+# Variables for inference
+cpt = '1625837699.580477'
+metafile_str = 'model-7300.meta'
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [INFO] %(message)s')
 numpy.set_printoptions(threshold=sys.maxsize)
@@ -25,9 +30,8 @@ with graph.as_default():
     session_conf = tf.compat.v1.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.compat.v1.Session(config=session_conf)
     with sess.as_default():
-        cpt = '1586193655.6973133'
-        saver = tf.compat.v1.train.import_meta_graph('./runs/' + cpt + '/checkpoints/model-14900.meta')
-        module_file = tf.train.latest_checkpoint("./runs/" + cpt + "/" + 'checkpoints/')
+        saver = tf.compat.v1.train.import_meta_graph('./runs/' + cpt + '/checkpoints/' + metafile_str)
+        module_file = tf.train.latest_checkpoint("./runs/" + cpt + '/checkpoints/')
         saver.restore(sess, module_file)
         input_x = graph.get_operation_by_name("inputs/x_input").outputs[0]
         predict = graph.get_operation_by_name("score_layer/prediction").outputs[0]
