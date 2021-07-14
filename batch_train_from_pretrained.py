@@ -44,7 +44,7 @@ def train():
             module_file = tf.train.latest_checkpoint("./runs/" + cpt + '/checkpoints/')
             saver.restore(sess, module_file)
             
-            #Summa = SummaRuNNer(vocab.size(), vocab._dim, vocab.wvecs)
+            Summa = SummaRuNNer(vocab.size(), vocab._dim, vocab.wvecs)
             writer = tf.compat.v1.summary.FileWriter(log_dir, sess.graph)
             train_loss_summary = tf.compat.v1.summary.scalar('train_loss', Summa.loss)
             streaming_loss, streaming_loss_update = tf.compat.v1.metrics.mean(Summa.loss)
