@@ -39,7 +39,12 @@ def train():
             log_device_placement=FLAGS.log_device_placement)
         sess = tf.compat.v1.Session(config=session_conf)
         with sess.as_default():
-            Summa = SummaRuNNer(vocab.size(), vocab._dim, vocab.wvecs)
+            # Load from previous checkpoint
+            saver = tf.compat.v1.train.import_meta_graph('./runs/' + cpt + '/checkpoints/' + metafile_str)
+            module_file = tf.train.latest_checkpoint("./runs/" + cpt + '/checkpoints/')
+            saver.restore(sess, module_file)
+            
+            #Summa = SummaRuNNer(vocab.size(), vocab._dim, vocab.wvecs)
             writer = tf.compat.v1.summary.FileWriter(log_dir, sess.graph)
             train_loss_summary = tf.compat.v1.summary.scalar('train_loss', Summa.loss)
             streaming_loss, streaming_loss_update = tf.compat.v1.metrics.mean(Summa.loss)
@@ -62,10 +67,6 @@ def train():
             sess.run(tf.compat.v1.global_variables_initializer())
             sess.run(tf.compat.v1.local_variables_initializer())
             
-            # Load from previous checkpoint
-            saver = tf.compat.v1.train.import_meta_graph('./runs/' + cpt + '/checkpoints/' + metafile_str)
-            module_file = tf.train.latest_checkpoint("./runs/" + cpt + '/checkpoints/')
-            saver.restore(sess, module_file)
             
             min_eval_loss = float('Inf')
             min_train_loss = float('Inf')
